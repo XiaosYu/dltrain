@@ -1,2 +1,5 @@
-# dltrain
-This is a package for PyTorch training, and this project provides a large number of high-level training APIs and low-level interfaces to meet all training needs
+# Example Package
+
+This is a simple example package. You can use
+[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
+to write your content.
