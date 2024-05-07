@@ -122,6 +122,7 @@ class MultilayerPerceptron(Module):
             for layer in layers:
                 modules.append(Linear(last_num, layer))
                 modules.append(constructor())
+                last_num = layer
             modules.append(Linear(last_num, targets))
 
         self.layers = Sequential(

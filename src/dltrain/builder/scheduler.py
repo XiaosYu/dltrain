@@ -1,33 +1,21 @@
-from abc import ABCMeta, abstractmethod
-from typing import Type
+from .core import Wizard
 
 from torch.optim.lr_scheduler import LRScheduler, StepLR
 
 __all__ = [
-    'SchedulerBuilder',
-    'StepLrBuilder'
+    'SchedulerWizard'
 ]
 
-class SchedulerBuilder(metaclass=ABCMeta):
+
+class SchedulerWizard(Wizard):
     def __init__(self):
-        self.parameters = {}
+        self._type = None
+        self._parameters = None
 
-    @abstractmethod
-    def get_type(self) -> Type[LRScheduler]:
-        pass
-
-    def get_parameters(self):
-        return self.parameters
-
-
-class StepLrBuilder(SchedulerBuilder):
-    def get_type(self) -> Type[LRScheduler]:
-        return StepLR
-
-    def set_step_size(self, step_size):
-        self.parameters['step_size'] = step_size
+    def use_scheduler(self, scheduler: type[LRScheduler], **kwargs):
+        self._type = scheduler
+        self._parameters = kwargs
         return self
 
-    def set_gamma(self, gamma):
-        self.parameters['gamma'] = gamma
-        return self
+    def use_step_lr(self, step_size, gamma):
+        return self.use_scheduler(StepLR, step_size=step_size, gamma=gamma)

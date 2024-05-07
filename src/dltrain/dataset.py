@@ -1,42 +1,31 @@
+import torch
 from torch.utils.data import Dataset, DataLoader
 from torch import Tensor, cat
 from abc import ABCMeta, abstractmethod
-
 from .error import check_length, try_convert, raise_error
 
+import os
+
 __all__ = [
-    'DatasetWizard',
     'DLDataset',
     'VectorCategoricalDataset',
     'VectorRegressionDataset',
-    'PyTorchNativeDataset'
+    'PyTorchNativeDataset',
+    'ImageCategoricalDataset',
+    'EmptyDataset'
 ]
 
-class DatasetWizard:
-    @classmethod
-    def use_mnist(cls, root, train, download=False):
-        from torchvision.datasets import MNIST
-        from torchvision.transforms import ToTensor
 
-        dataset = MNIST(root, train=train, transform=ToTensor(), download=download)
-        return PyTorchNativeDataset(dataset)
+def load_images(folder_name):
+    from PIL import Image
+    from torchvision.transforms.functional import to_tensor
 
-    @classmethod
-    def use_iris(cls):
-        from sklearn.datasets import load_iris
+    images = []
+    for filename in os.listdir(folder_name):
+        image = Image.open(filename)
+        images.append(to_tensor(image))
 
-        iris = load_iris()
-        data = iris.data
-        target = iris.target
-        return VectorCategoricalDataset(data, target)
-
-    @classmethod
-    def use_image_folder(cls, root):
-        from torchvision.datasets import ImageFolder
-        from torchvision.transforms import ToTensor
-
-        dataset = ImageFolder(root, transform=ToTensor())
-        return PyTorchNativeDataset(dataset)
+    return torch.Tensor(images)
 
 
 class DLDataset(Dataset, metaclass=ABCMeta):
@@ -67,6 +56,17 @@ class DLDataset(Dataset, metaclass=ABCMeta):
 
     def __getitem__(self, idx):
         return self.index_of(idx)
+
+
+class EmptyDataset(DLDataset):
+    def __init__(self):
+        super().__init__()
+
+    def index_of(self, idx):
+        return None
+
+    def get_length(self):
+        return 0
 
 
 class PyTorchNativeDataset(DLDataset):
@@ -105,6 +105,35 @@ class VectorCategoricalDataset(DLDataset):
         return self.features[idx], self.targets[idx]
 
 
+class ImageCategoricalDataset(DLDataset):
+    def __init__(self, images, labels):
+
+        images = try_convert(images, Tensor, 'features', 'Tensor')
+        labels = try_convert(labels, Tensor, 'targets', 'Tensor').long()
+
+        check_length(images, labels, 'images', 'labels')
+
+        try:
+            image_shape = images.shape
+            if len(image_shape) == 3:
+                # [batch, w, h] -> [batch, 1, w, h]
+                images = images.reshape(image_shape[0], 1, image_shape[1], image_shape[2])
+
+            labels = labels.reshape(-1)
+        except:
+            raise_error('reshape features and targets',
+                        f'features shape({images.shape}) or labels shape({labels.shape}) cannot reshape')
+
+        self.features = images
+        self.targets = labels
+
+    def get_length(self):
+        return len(self.features)
+
+    def index_of(self, idx):
+        return self.features[idx], self.targets[idx]
+
+
 class VectorRegressionDataset(DLDataset):
     def __init__(self, features, targets):
 
@@ -128,3 +157,19 @@ class VectorRegressionDataset(DLDataset):
 
     def index_of(self, idx):
         return self.features[idx], self.targets[idx]
+
+
+class ImageMaskedDataset(DLDataset):
+    def __init__(self, source_image_folder, masked_image_folder):
+        source_images = load_images(source_image_folder)
+        masked_images = load_images(masked_image_folder)
+        self.source_images = source_images
+        self.masked_images = masked_images
+
+        check_length(len(source_images), len(masked_images), 'source images', 'masked images')
+
+    def index_of(self, idx):
+        return self.source_images[idx], self.masked_images[idx]
+
+    def get_length(self):
+        return len(self.source_images)

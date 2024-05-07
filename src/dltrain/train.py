@@ -1,8 +1,11 @@
 import os
+
+import numpy as np
 import torch
 import pandas as pd
 
 from .utils import set_plt, LoggerContext
+from .error import try_convert
 
 from torch.utils.data import DataLoader
 
@@ -41,7 +44,8 @@ class SimpleTrainer(Trainer):
 
         checkpoint: CheckPoint = None
         if options.start_checkpoint is not None:
-            checkpoint = torch.load(options.start_checkpoint)
+            checkpoint = torch.load(options.start_checkpoint) if (
+                isinstance(options.start_checkpoint, str)) else options.start_checkpoint
             options = checkpoint.options
 
             logger.info(f'Loading checkpoint at {options.start_checkpoint}')
@@ -108,6 +112,7 @@ class SimpleTrainer(Trainer):
                 model.train()
                 model.to(options.device)
                 for idx, (x, y) in enumerate(train_loader):
+                    torch.cuda.empty_cache()
                     pbar.set_description(f'Train[{epoch + 1}/{options.epochs}]')
 
                     x, y = x.to(options.device), y.to(options.device)
@@ -121,7 +126,7 @@ class SimpleTrainer(Trainer):
                                    criterion=criterion,
                                    x=x, y=y, eval=False,
                                    evaluation=train_evaluation,
-                                   optimizer=optimizer)
+                                   optimizer=optimizer, epoch=epoch, idx=idx)
 
                     pbar.set_postfix(loss=float(loss))
                     pbar.update(1)
@@ -134,7 +139,7 @@ class SimpleTrainer(Trainer):
             model.eval()
             with torch.no_grad():
                 for idx, (x, y) in enumerate(eval_loader):
-
+                    torch.cuda.empty_cache()
                     x, y = x.to(options.device), y.to(options.device)
 
                     if features_transform is not None:
@@ -145,7 +150,7 @@ class SimpleTrainer(Trainer):
 
                     loss = forward(model=model,
                                    criterion=criterion,
-                                   x=x, y=y, eval=True,
+                                   x=x, y=y, eval=True, epoch=epoch, idx=idx,
                                    evaluation=eval_evaluation)
 
                 # 计算训练集与测试集Loss
@@ -160,18 +165,18 @@ class SimpleTrainer(Trainer):
                 # 分别计算验证Handler
                 if train_evaluation_handlers is not None:
                     for key, handler in train_evaluation_handlers.items():
-                        val = handler.compute(train_evaluation.predictions, train_evaluation.exacts)
-                        if key in total_train_evaluation:
+                        val = handler(train_evaluation.predictions, train_evaluation.exacts)
+                        if key in total_train_evaluation and val is not None:
                             total_train_evaluation[key].append(val)
-                        else:
+                        elif val is not None:
                             total_train_evaluation[key] = [val]
 
                 if eval_evaluation_handlers is not None:
                     for key, handler in eval_evaluation_handlers.items():
-                        val = handler.compute(eval_evaluation.predictions, eval_evaluation.exacts)
-                        if key in total_eval_evaluation:
+                        val = handler(eval_evaluation.predictions, eval_evaluation.exacts)
+                        if key in total_eval_evaluation and val is not None:
                             total_eval_evaluation[key].append(val)
-                        else:
+                        elif val is not None:
                             total_eval_evaluation[key] = [val]
 
                 train_evaluation.reset()
@@ -197,7 +202,7 @@ class SimpleTrainer(Trainer):
                     # Save checkpoint
                     checkpoint = CheckPoint(
                         epoch,
-                        optimizer.state_dict(),
+                        optimizer.state_dict() if optimizer is not None else None,
                         scheduler.state_dict() if scheduler is not None else None,
                         total_train_loss,
                         total_eval_loss,
@@ -208,6 +213,7 @@ class SimpleTrainer(Trainer):
                     )
 
                     checkpoint.save(options.task_name)
+                    del checkpoint
 
                 print()
 
@@ -226,6 +232,40 @@ class SimpleTrainer(Trainer):
         })
         loss_frame.index.name = 'Epoch'
         loss_frame.to_csv(f'{options.task_name}/loss_result.csv', encoding='utf-8')
+
+        # 映射可计算列
+        for key in total_eval_evaluation:
+            data = total_eval_evaluation[key]
+            if isinstance(data, torch.Tensor):
+                total_eval_evaluation[key] = data.cpu().detach()
+
+        for key in total_train_evaluation:
+            data = total_train_evaluation[key]
+            if isinstance(data, torch.Tensor):
+                total_eval_evaluation[key] = data.cpu().detach()
+
+        # 判断验证列是否可绘制
+        for (key, value) in total_train_evaluation.items():
+            drawable = train_evaluation_handlers[key].drawable
+            if drawable:
+                value = try_convert(value, np.array, f'{key} train evaluation', 'numpy.array')
+                if len(value.shape) == 2 or len(value.shape) == 1:
+                    value = value.reshape(-1)
+                    plt.figure(dpi=300)
+                    plt.plot(value, label=key)
+                    plt.legend()
+                    plt.savefig(f'{options.task_name}/{key}-train.png')
+
+        for (key, value) in total_eval_evaluation.items():
+            drawable = eval_evaluation_handlers[key].drawable
+            if drawable:
+                value = try_convert(value, np.array, f'{key} eval evaluation', 'numpy.array')
+                if len(value.shape) == 2 or len(value.shape) == 1:
+                    value = value.reshape(-1)
+                    plt.figure(dpi=300)
+                    plt.plot(value, label=key)
+                    plt.legend()
+                    plt.savefig(f'{options.task_name}/{key}-eval.png')
 
         if train_evaluation_handlers is not None:
             train_evaluation_frame = pd.DataFrame(
@@ -246,3 +286,4 @@ class SimpleTrainer(Trainer):
             eval_evaluation_frame.to_csv(f'{options.task_name}/eval_evaluation_result.csv', encoding='utf-8')
 
         logger.save(f'{options.task_name}/log.txt')
+

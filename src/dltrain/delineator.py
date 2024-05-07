@@ -1,14 +1,14 @@
 from abc import ABCMeta, abstractmethod
 
-from .dataset import DLDataset, PyTorchNativeDataset
+from .dataset import DLDataset, PyTorchNativeDataset, EmptyDataset
 from torch.utils.data import random_split
-
 
 __all__ = [
     'Delineator',
     'TrainEvalSetDelineator',
     'RandomSplitDelineator'
 ]
+
 
 class Delineator(metaclass=ABCMeta):
     @abstractmethod
@@ -21,9 +21,9 @@ class Delineator(metaclass=ABCMeta):
 
 
 class TrainEvalSetDelineator(Delineator):
-    def __init__(self, train_set: DLDataset, eval_set: DLDataset):
+    def __init__(self, train_set: DLDataset, eval_set: DLDataset = None):
         self.train_set = train_set
-        self.eval_set = eval_set
+        self.eval_set = eval_set if eval_set is not None else EmptyDataset()
 
     def get_eval_set(self) -> DLDataset:
         return self.eval_set

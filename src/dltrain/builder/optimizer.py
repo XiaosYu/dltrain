@@ -1,38 +1,30 @@
 from torch.optim import SGD, Adam, AdamW, Optimizer
-from abc import ABCMeta, abstractmethod
-from typing import Type
+from .core import Wizard
 
 __all__ = [
-    'OptimizerBuilder',
-    'AdamBuilder',
-    'AdamWBuilder',
-    'SgdBuilder'
+    'OptimizerWizard'
 ]
 
-class OptimizerBuilder(metaclass=ABCMeta):
+
+class OptimizerWizard(Wizard):
     def __init__(self):
-        self.parameters = {}
+        self._type = None
+        self._parameters = {}
 
-    @abstractmethod
-    def get_type(self) -> Type[Optimizer]:
-        pass
+        self.use_sgd()
 
-    def get_parameters(self):
-        return self.parameters
-
-    def set_lr(self, lr: float):
-        self.parameters['lr'] = lr
+    def use_optimizer(self, optimizer: type[Optimizer], **kwargs):
+        self._type = optimizer
+        self._parameters = kwargs
         return self
 
+    def use_sgd(self, lr=1e-2, momentum=0, dampening=0, weight_decay=0):
+        return self.use_optimizer(SGD, lr=lr, momentum=momentum, dampening=dampening, weight_decay=weight_decay)
 
-class SgdBuilder(OptimizerBuilder):
-    def get_type(self) -> Type[Optimizer]:
-        return SGD
+    def use_adam(self, lr=1e-2, betas: tuple[float, float] = (0.9, 0.999), eps: float = 1e-8, weight_decay: float = 0,
+                 amsgrad: bool = False):
+        return self.use_optimizer(Adam, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, amsgrad=amsgrad)
 
-class AdamBuilder(OptimizerBuilder):
-    def get_type(self) -> Type[Optimizer]:
-        return Adam
-
-class AdamWBuilder(OptimizerBuilder):
-    def get_type(self) -> Type[Optimizer]:
-        return AdamW
+    def use_adamw(self, lr=1e-2, betas: tuple[float, float] = (0.9, 0.999), eps: float = 1e-8, weight_decay: float = 0,
+                 amsgrad: bool = False):
+        return self.use_optimizer(AdamW, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, amsgrad=amsgrad)

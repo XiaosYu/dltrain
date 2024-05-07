@@ -1,5 +1,5 @@
 from .train import *
-from .builder import *
+from .builder import TaskBuilder
 from .dataset import *
 from .delineator import *
 from .evaluation import *
