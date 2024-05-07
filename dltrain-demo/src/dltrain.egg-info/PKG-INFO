@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: dltrain
+Version: 0.1.0
+Summary: This is a package for PyTorch training, and this project provides a large number of high-level training APIs and low-level interfaces to meet all training needs
+Author-email: XiaosYu <lijingyu_ai@163.com>
+Project-URL: Homepage, https://github.com/XiaosYu/dltrain
+Project-URL: Bug Tracker, https://github.com/XiaosYu/dltrain/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Example Package
+
+This is a simple example package. You can use
+[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
+to write your content.
