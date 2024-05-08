@@ -1,4 +1,4 @@
-from ..transform import Transform, Standardize, Resize
+from ..transform import Transform, Standardize, Resize, Noise
 from .core import Wizard
 
 
@@ -18,6 +18,9 @@ class TransformWizard(Wizard):
     def add_resize(self, size, is_feature=True):
         self.add_transform(Resize(size), is_feature)
         return self
+
+    def add_noise(self, rate=0.01, is_feature=True):
+        self.add_transform(Noise(rate), is_feature)
 
     def add_standardize(self, is_feature=True):
         self.add_transform(Standardize(), is_feature)

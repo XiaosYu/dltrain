@@ -1,5 +1,6 @@
 from .core import Wizard
-from ..models import MultilayerPerceptron, PyTorchNativeCNN, create_native_model, Module
+from ..models import MultilayerPerceptron, PyTorchNativeCNN, create_native_model
+from torch.nn import Module
 
 
 class ModelWizard(Wizard):

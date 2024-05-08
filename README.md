@@ -138,3 +138,12 @@ __Model__ = [
 | delineator*      | None,Must be specified by the user                 |
 | forward          | SimpleForward                                      |
 | trainer          | SimpleTrainer                                      |
+
+## Version Log
+- 0.0.1<br/>
+1、构造整体模型框架
+- 0.0.2<br/>
+1、加入了TaskBuilder方便构造模型
+- 0.1.2<br/>
+1、加入了InjectForward(可以通过InjectWizard注入训练时策略，如实时检测模型参数梯度的分布等)
+2、将models.py封装到models包，添加了许多拆箱可用模型

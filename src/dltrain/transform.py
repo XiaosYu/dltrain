@@ -1,10 +1,13 @@
 from abc import ABCMeta, abstractmethod
+
+import torch
 from torch import Tensor
 
 __all__ = [
     'Transform',
     'Container',
     'Resize',
+    'Noise',
     'Standardize'
 ]
 
@@ -15,6 +18,15 @@ class Transform(metaclass=ABCMeta):
     @abstractmethod
     def transform(self, data: Tensor):
         pass
+
+
+class Noise(Transform):
+    def __init__(self, rate=0.01):
+        self.rate = rate
+
+    def transform(self, data: Tensor):
+        noise = torch.rand(data.shape).to(data.device) * self.rate
+        return data + noise
 
 
 class Container(Transform):
