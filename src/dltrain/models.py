@@ -1,4 +1,5 @@
-from torch.nn import Module, Linear, Sigmoid, ReLU, LeakyReLU, Sequential
+from torch.nn import (Module, Linear, Sigmoid, ReLU, LeakyReLU, Sequential, Tanh, Hardswish, Threshold, Dropout,
+                      BatchNorm2d, BatchNorm1d, LazyBatchNorm1d)
 from torchvision.models import GoogLeNet
 from torchvision.models import (
     googlenet, alexnet,
@@ -55,7 +56,8 @@ __Model__ = [
 ]
 
 __Activation__ = [
-    Sigmoid, ReLU, LeakyReLU
+    Sigmoid, ReLU, LeakyReLU, Tanh, Hardswish,
+    BatchNorm1d, BatchNorm2d, LazyBatchNorm1d
 ]
 
 __all__ = [
