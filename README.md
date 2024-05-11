@@ -5,6 +5,10 @@
 ```bash
 pip install dltrain
 ```
+利用该工具包我们可用通过如下结构构建训练代码
+<img src="img/dltrain.png"/>
+
+## Example
 ### example .1 在iris数据集上使用多层感知器进行分类
 ```python
 from dltrain import TaskBuilder, SimpleTrainer
@@ -78,7 +82,7 @@ SimpleTrainer().run(builder.build())
 ```
 模型向导对象的use_model接口允许用户传入自己的模型
 
-### Example .2.1 使用torchvision的自带模型
+### example .2.1 使用torchvision的自带模型
 ```python
 from dltrain import TaskBuilder, SimpleTrainer
 

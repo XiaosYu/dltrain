@@ -9,7 +9,6 @@ src/dltrain/error.py
 src/dltrain/evaluation.py
 src/dltrain/forward.py
 src/dltrain/inject.py
-src/dltrain/models.py
 src/dltrain/options.py
 src/dltrain/train.py
 src/dltrain/transform.py
@@ -32,3 +31,7 @@ src/dltrain/builder/model.py
 src/dltrain/builder/optimizer.py
 src/dltrain/builder/scheduler.py
 src/dltrain/builder/transforms.py
+src/dltrain/models/__init__.py
+src/dltrain/models/component.py
+src/dltrain/models/model.py
+src/dltrain/models/wrapper.py
