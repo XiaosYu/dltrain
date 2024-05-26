@@ -54,14 +54,3 @@ class ConvClassificationHeader(nn.Module):
         return data
 
 
-class TaskModel(nn.Module):
-    def __init__(self, feature_model: nn.Module, header_model: nn.Module):
-        super().__init__()
-
-        self.feature_model = feature_model
-        self.header_model = header_model
-
-    def forward(self, data):
-        data = self.feature_model(data)
-        data = self.header_model(data)
-        return data

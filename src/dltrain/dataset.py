@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch import Tensor, cat
@@ -67,6 +68,25 @@ class EmptyDataset(DLDataset):
 
     def get_length(self):
         return 0
+
+
+class VectorSequenceDataset(DLDataset):
+    def __init__(self, data, seq_length=3):
+        # data shape like [batch_size, features_length]
+        # convert shape like [batch_size, seq_length, features_length]
+        data = np.array(data)
+        data = np.lib.stride_tricks.sliding_window_view(data, window_shape=(seq_length + 1, len(data[0]))).reshape(
+            (-1, seq_length + 1, data.shape[1]))
+        self.data = data
+
+    def get_length(self):
+        return self.data.shape[0]
+
+    def index_of(self, idx):
+        seq = self.data[idx]
+        features = seq[: -1]
+        targets = seq[-1]
+        return features, targets
 
 
 class PyTorchNativeDataset(DLDataset):

@@ -127,7 +127,7 @@ __Model__ = [
 ]
 ```
 ### default about the arguments
-| 参数名称             | 默认值                                                |
+| 参数名称             | 默认值                                                |    
 |------------------|----------------------------------------------------|
 | optimizer        | Sgd(lr=0.01,momentum=0,dampening=0,weight_decay=0) |
 | scheduler        | User-set                                           |
@@ -138,7 +138,7 @@ __Model__ = [
 | seed             | 3407                                               |
 | device           | cpu                                                |
 | save_checkpoint  | False                                              |
-| start_checkpoint | User-set                                           |
+| start_checkpoint | None,User-set                                      |
 | delineator*      | None,Must be specified by the user                 |
 | forward          | SimpleForward                                      |
 | trainer          | SimpleTrainer                                      |
@@ -149,5 +149,8 @@ __Model__ = [
 - 0.0.2<br/>
 1、加入了TaskBuilder方便构造模型
 - 0.1.2<br/>
-1、加入了InjectForward(可以通过InjectWizard注入训练时策略，如实时检测模型参数梯度的分布等)
+1、加入了InjectForward(可以通过InjectWizard注入训练时策略，如实时检测模型参数梯度的分布等)<br/>
 2、将models.py封装到models包，添加了许多拆箱可用模型
+- 0.1.3<br/>
+1、引入错误处理机制，防止由于EventHandler设置问题导致的结果保存错误<br/>
+2、引入VectorSequenceDataset<br/>

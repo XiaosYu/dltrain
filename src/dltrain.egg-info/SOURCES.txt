@@ -32,6 +32,7 @@ src/dltrain/builder/optimizer.py
 src/dltrain/builder/scheduler.py
 src/dltrain/builder/transforms.py
 src/dltrain/models/__init__.py
+src/dltrain/models/builder.py
 src/dltrain/models/component.py
 src/dltrain/models/model.py
 src/dltrain/models/wrapper.py

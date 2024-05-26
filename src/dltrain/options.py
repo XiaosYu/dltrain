@@ -44,3 +44,4 @@ class TrainOptions:
         self.targets_transform: Transform = None
 
         self.device: device = None
+        self.log_level: int = None

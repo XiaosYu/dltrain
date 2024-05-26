@@ -199,91 +199,123 @@ class SimpleTrainer(Trainer):
                         logger.info(f'Eval {key}: {total_eval_evaluation[key][-1]}')
 
                 if options.save_checkpoint:
-                    # Save checkpoint
-                    checkpoint = CheckPoint(
-                        epoch,
-                        optimizer.state_dict() if optimizer is not None else None,
-                        scheduler.state_dict() if scheduler is not None else None,
-                        total_train_loss,
-                        total_eval_loss,
-                        total_train_evaluation,
-                        total_eval_evaluation,
-                        options,
-                        best_eval_loss
-                    )
+                    try:
+                        # Save checkpoint
+                        checkpoint = CheckPoint(
+                            epoch,
+                            optimizer.state_dict() if optimizer is not None else None,
+                            scheduler.state_dict() if scheduler is not None else None,
+                            total_train_loss,
+                            total_eval_loss,
+                            total_train_evaluation,
+                            total_eval_evaluation,
+                            options,
+                            best_eval_loss
+                        )
 
-                    checkpoint.save(options.task_name)
-                    del checkpoint
+                        checkpoint.save(options.task_name)
+                        del checkpoint
+                    except Exception as e:
+                        logger.error(e)
 
                 print()
 
         # Draw results of total training and evaluation
-        plt.figure()
-        plt.plot(total_train_loss, label='Epoch Train Loss')
-        plt.plot(total_eval_loss, label='Epoch Eval Loss')
-        plt.legend()
-        plt.savefig(f'{options.task_name}/loss.png', dpi=300)
+        try:
+            plt.figure()
+            plt.plot(total_train_loss, label='Epoch Train Loss')
+            plt.plot(total_eval_loss, label='Epoch Eval Loss')
+            plt.legend()
+            plt.savefig(f'{options.task_name}/loss.png', dpi=300)
+        except Exception as e:
+            logger.error(e)
 
-        torch.save(model.cpu(), f'{options.task_name}/weights/last.pt')
+        try:
+            torch.save(model.cpu(), f'{options.task_name}/weights/last.pt')
+        except Exception as e:
+            logger.error(e)
 
-        loss_frame = pd.DataFrame({
-            'Train Loss': total_train_loss,
-            'Eval Loss': total_eval_loss
-        })
-        loss_frame.index.name = 'Epoch'
-        loss_frame.to_csv(f'{options.task_name}/loss_result.csv', encoding='utf-8')
+        try:
+            loss_frame = pd.DataFrame({
+                'Train Loss': total_train_loss,
+                'Eval Loss': total_eval_loss
+            })
+            loss_frame.index.name = 'Epoch'
+            loss_frame.to_csv(f'{options.task_name}/loss_result.csv', encoding='utf-8')
+        except Exception as e:
+            logger.error(e)
 
         # 映射可计算列
-        for key in total_eval_evaluation:
-            data = total_eval_evaluation[key]
-            if isinstance(data, torch.Tensor):
-                total_eval_evaluation[key] = data.cpu().detach()
+        try:
+            for key in total_eval_evaluation:
+                data = total_eval_evaluation[key]
+                if isinstance(data, torch.Tensor):
+                    total_eval_evaluation[key] = data.cpu().detach()
+        except Exception as e:
+            logger.error(e)
 
-        for key in total_train_evaluation:
-            data = total_train_evaluation[key]
-            if isinstance(data, torch.Tensor):
-                total_eval_evaluation[key] = data.cpu().detach()
+        try:
+            for key in total_train_evaluation:
+                data = total_train_evaluation[key]
+                if isinstance(data, torch.Tensor):
+                    total_eval_evaluation[key] = data.cpu().detach()
+        except Exception as e:
+            logger.error(e)
 
         # 判断验证列是否可绘制
         for (key, value) in total_train_evaluation.items():
-            drawable = train_evaluation_handlers[key].drawable
-            if drawable:
-                value = try_convert(value, np.array, f'{key} train evaluation', 'numpy.array')
-                if len(value.shape) == 2 or len(value.shape) == 1:
-                    value = value.reshape(-1)
-                    plt.figure(dpi=300)
-                    plt.plot(value, label=key)
-                    plt.legend()
-                    plt.savefig(f'{options.task_name}/{key}-train.png')
+            try:
+                drawable = train_evaluation_handlers[key].drawable
+                if drawable:
+                    value = try_convert(value, np.array, f'{key} train evaluation', 'numpy.array')
+                    if len(value.shape) == 2 or len(value.shape) == 1:
+                        value = value.reshape(-1)
+                        plt.figure(dpi=300)
+                        plt.plot(value, label=key)
+                        plt.legend()
+                        plt.savefig(f'{options.task_name}/{key}-train.png')
+            except Exception as e:
+                logger.error(e)
 
         for (key, value) in total_eval_evaluation.items():
-            drawable = eval_evaluation_handlers[key].drawable
-            if drawable:
-                value = try_convert(value, np.array, f'{key} eval evaluation', 'numpy.array')
-                if len(value.shape) == 2 or len(value.shape) == 1:
-                    value = value.reshape(-1)
-                    plt.figure(dpi=300)
-                    plt.plot(value, label=key)
-                    plt.legend()
-                    plt.savefig(f'{options.task_name}/{key}-eval.png')
+            try:
+                drawable = eval_evaluation_handlers[key].drawable
+                if drawable:
+                    value = try_convert(value, np.array, f'{key} eval evaluation', 'numpy.array')
+                    if len(value.shape) == 2 or len(value.shape) == 1:
+                        value = value.reshape(-1)
+                        plt.figure(dpi=300)
+                        plt.plot(value, label=key)
+                        plt.legend()
+                        plt.savefig(f'{options.task_name}/{key}-eval.png')
+            except Exception as e:
+                logger.error(e)
 
         if train_evaluation_handlers is not None:
-            train_evaluation_frame = pd.DataFrame(
-                {
-                    **total_train_evaluation
-                }
-            )
-            train_evaluation_frame.index.name = 'Epoch'
-            train_evaluation_frame.to_csv(f'{options.task_name}/train_evaluation_result.csv', encoding='utf-8')
+            try:
+                train_evaluation_frame = pd.DataFrame(
+                    {
+                        **total_train_evaluation
+                    }
+                )
+                train_evaluation_frame.index.name = 'Epoch'
+                train_evaluation_frame.to_csv(f'{options.task_name}/train_evaluation_result.csv',
+                                              encoding='utf-8')
+            except Exception as e:
+                logger.error(e)
 
         if eval_evaluation_handlers is not None:
-            eval_evaluation_frame = pd.DataFrame(
-                {
-                    **total_eval_evaluation
-                }
-            )
-            eval_evaluation_frame.index.name = 'Epoch'
-            eval_evaluation_frame.to_csv(f'{options.task_name}/eval_evaluation_result.csv', encoding='utf-8')
+            try:
+                eval_evaluation_frame = pd.DataFrame(
+                    {
+                        **total_eval_evaluation
+                    }
+                )
+                eval_evaluation_frame.index.name = 'Epoch'
+                eval_evaluation_frame.to_csv(f'{options.task_name}/eval_evaluation_result.csv'
+                                             , encoding='utf-8')
+            except Exception as e:
+                logger.error(e)
 
         logger.save(f'{options.task_name}/log.txt')
 

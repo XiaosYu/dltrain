@@ -22,11 +22,14 @@ class Evaluation:
         self.predictions = None
         self.exacts = None
 
+
     def append(self, prediction):
         self.predictions = prediction if self.predictions is None else torch.cat([self.predictions, prediction], dim=0)
 
     def reset(self):
         self.predictions = None
+
+
 
 
 class EvaluationHandler(metaclass=ABCMeta):

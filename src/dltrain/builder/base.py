@@ -14,6 +14,7 @@ class BaseWizard(Wizard):
         self._save_checkpoint: bool = False
         self._epochs: int = 10
         self._device: torch.device = torch.device('cpu')
+        self._log_level: int = 0
 
     def use_batch_size(self, bs):
         self._batch_size = bs
@@ -23,11 +24,18 @@ class BaseWizard(Wizard):
         self._seed = seed
         return self
 
-    def set_checkpoint(self, checkpoint: bool = False):
-        self._save_checkpoint = checkpoint
+    def use_log_level(self, level: int):
+        self._log_level = level
         return self
 
-    def use_checkpoint(self, checkpoint: str) -> CheckPoint:
+    def use_log_loss(self):
+        pass
+
+    def use_checkpoint(self):
+        self._save_checkpoint = True
+        return self
+
+    def use_checkpoint_path(self, checkpoint: str) -> CheckPoint:
         self._start_checkpoint = torch.load(checkpoint)
         return self._start_checkpoint
 
@@ -35,7 +43,7 @@ class BaseWizard(Wizard):
         self._epochs = epochs
         return self
 
-    def use_device(self, device: Union[torch.device, str]):
+    def use_device(self, device: Union[torch.device, str] = 'cuda'):
         if isinstance(device, str):
             self._device = torch.device(device)
         elif isinstance(device, torch.device):

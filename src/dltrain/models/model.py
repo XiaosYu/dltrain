@@ -7,7 +7,8 @@ __Activation__ = [
 ]
 
 __all__ = [
-    'MultilayerPerceptron'
+    'MultilayerPerceptron',
+    'TaskModel'
 ]
 
 
@@ -47,3 +48,16 @@ class MultilayerPerceptron(Module):
     def forward(self, data):
         data = data.reshape(data.shape[0], -1)
         return self.layers(data)
+
+
+class TaskModel(Module):
+    def __init__(self, feature_model: Module, header_model: Module):
+        super().__init__()
+
+        self.feature_model = feature_model
+        self.header_model = header_model
+
+    def forward(self, data):
+        data = self.feature_model(data)
+        data = self.header_model(data)
+        return data

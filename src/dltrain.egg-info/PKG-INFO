@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: dltrain
-Version: 0.1.2
+Version: 0.1.3
 Summary: This is a package for PyTorch training, and this project provides a large number of high-level training APIs and low-level interfaces to meet all training needs
 Author-email: XiaosYu <lijingyu_ai@163.com>
 Project-URL: Homepage, https://github.com/XiaosYu/dltrain
@@ -19,6 +19,10 @@ License-File: LICENSE
 ```bash
 pip install dltrain
 ```
+利用该工具包我们可用通过如下结构构建训练代码
+<img src="img/dltrain.png"/>
+
+## Example
 ### example .1 在iris数据集上使用多层感知器进行分类
 ```python
 from dltrain import TaskBuilder, SimpleTrainer
@@ -92,7 +96,7 @@ SimpleTrainer().run(builder.build())
 ```
 模型向导对象的use_model接口允许用户传入自己的模型
 
-### Example .2.1 使用torchvision的自带模型
+### example .2.1 使用torchvision的自带模型
 ```python
 from dltrain import TaskBuilder, SimpleTrainer
 
@@ -137,7 +141,7 @@ __Model__ = [
 ]
 ```
 ### default about the arguments
-| 参数名称             | 默认值                                                |
+| 参数名称             | 默认值                                                |    
 |------------------|----------------------------------------------------|
 | optimizer        | Sgd(lr=0.01,momentum=0,dampening=0,weight_decay=0) |
 | scheduler        | User-set                                           |
@@ -148,7 +152,7 @@ __Model__ = [
 | seed             | 3407                                               |
 | device           | cpu                                                |
 | save_checkpoint  | False                                              |
-| start_checkpoint | User-set                                           |
+| start_checkpoint | None,User-set                                      |
 | delineator*      | None,Must be specified by the user                 |
 | forward          | SimpleForward                                      |
 | trainer          | SimpleTrainer                                      |
@@ -159,5 +163,8 @@ __Model__ = [
 - 0.0.2<br/>
 1、加入了TaskBuilder方便构造模型
 - 0.1.2<br/>
-1、加入了InjectForward(可以通过InjectWizard注入训练时策略，如实时检测模型参数梯度的分布等)
+1、加入了InjectForward(可以通过InjectWizard注入训练时策略，如实时检测模型参数梯度的分布等)<br/>
 2、将models.py封装到models包，添加了许多拆箱可用模型
+- 0.1.3<br/>
+1、引入错误处理机制，防止由于EventHandler设置问题导致的结果保存错误<br/>
+2、引入VectorSequenceDataset<br/>
