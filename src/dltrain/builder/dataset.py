@@ -1,4 +1,4 @@
-from ctypes import Union
+from typing import Union
 
 import numpy as np
 import torch
