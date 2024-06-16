@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: dltrain
-Version: 0.1.3
+Version: 0.1.4
 Summary: This is a package for PyTorch training, and this project provides a large number of high-level training APIs and low-level interfaces to meet all training needs
 Author-email: XiaosYu <lijingyu_ai@163.com>
 Project-URL: Homepage, https://github.com/XiaosYu/dltrain
@@ -168,3 +168,5 @@ __Model__ = [
 - 0.1.3<br/>
 1、引入错误处理机制，防止由于EventHandler设置问题导致的结果保存错误<br/>
 2、引入VectorSequenceDataset<br/>
+
+
