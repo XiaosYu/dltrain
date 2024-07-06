@@ -1,6 +1,6 @@
 [project]
 name = "dltrain"
-version = "0.1.4"
+version = "0.1.5"
 authors = [
   { name="XiaosYu", email="lijingyu_ai@163.com" },
 ]

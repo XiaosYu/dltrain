@@ -22,14 +22,11 @@ class Evaluation:
         self.predictions = None
         self.exacts = None
 
-
     def append(self, prediction):
         self.predictions = prediction if self.predictions is None else torch.cat([self.predictions, prediction], dim=0)
 
     def reset(self):
         self.predictions = None
-
-
 
 
 class EvaluationHandler(metaclass=ABCMeta):
@@ -80,6 +77,15 @@ class MeanSquareError(EvaluationHandler):
     def compute(self, epoch_predictions: Tensor, epoch_exacts: Tensor):
         mse = torch.nn.functional.mse_loss(epoch_predictions, epoch_exacts)
         return float(mse)
+
+
+class MeanAbsoluteError(EvaluationHandler):
+    def __init__(self, drawable=False):
+        super().__init__(drawable)
+
+    def compute(self, epoch_predictions: Tensor, epoch_exacts: Tensor):
+        mae = torch.nn.functional.l1_loss(epoch_predictions, epoch_exacts)
+        return float(mae)
 
 
 class RSquare(EvaluationHandler):
